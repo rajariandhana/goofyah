@@ -1,16 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"goofyah/config"
 	"goofyah/database"
 	"goofyah/routes"
 )
 
 func main() {
-	config.LoadConfig() // Load environment variables
-	database.Connect()  // Initialize DB connection
+	config.LoadConfig()
+	db, err := database.Connect()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 
-	router := routes.SetupRoutes() // Set up application routes
-
-	router.Run(":8080") // Start server on port 8080
+	router := routes.SetupRoutes(db)
+	router.Run(":8080")
 }

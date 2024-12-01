@@ -1,0 +1,11 @@
+{{ template "header.html" . }}
+<div class="bg-white rounded-md shadow-md px-4 py-2">
+    I am here
+</div>
+
+<div class="bg-white rounded-md shadow-md px-4 py-2">
+    {{range .list}}
+    <span>{{.}}</span>
+    {{end}}
+</div>
+{{ template "footer.html" . }}

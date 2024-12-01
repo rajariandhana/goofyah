@@ -1,0 +1,34 @@
+{{ template "header.html" . }}
+<form action="/users/store" method="POST"
+class="bg-white rounded-md shadow-md px-4 py-2 w-full">
+    <span class="font-medium mb-2">Create User</span>
+    <div class="mb-5">
+        <label for="name" class="block mb-2 text-sm font-medium">Name:</label>
+        <input type="text" id="name" name="name" placeholder="John Doe" required
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md shadow-md focus:ring-indigo-500 focus:border-indigo-500 block w-1/2 px-4 py-2">
+    </div>
+    <div class="mb-5"></div>
+        <label for="email" class="block mb-2 text-sm font-medium">Email:</label>
+        <input type="text" id="email" name="email" placeholder="john@example.com" required
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md shadow-md focus:ring-indigo-500 focus:border-indigo-500 block w-1/2 px-4 py-2">
+    </div>
+    <button class="mt-4 bg-indigo-500 w-fit rounded-md shadow-md px-4 py-2 text-white" type="submit">Create User</button>
+</form>
+
+<div class="bg-white rounded-md shadow-md px-4 py-2">
+    <span class="font-medium">List of users</span>
+    {{if .users}}
+        <ul class="list-disc ml-4">
+            {{range .users}}
+                <li>
+                     <a href="/users/{{ .ID }}">{{ .Name }} {{ .Email }}</a>
+                </li>
+            {{end}}
+        </ul>
+    {{else}}
+        <p>No users available.</p>
+    {{end}}
+</div>
+
+
+{{ template "footer.html" . }}
