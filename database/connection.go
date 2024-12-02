@@ -2,6 +2,7 @@ package database
 
 import (
 	"goofyah/models"
+	"log"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -9,16 +10,15 @@ import (
 
 var DB *gorm.DB
 
-func Connect() (*gorm.DB, error) {
-	// var err error
-	DB, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+func Setup() (*gorm.DB, error) {
+	var err error
+	DB, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		panic("Failed to connect" + err.Error())
 	}
-
 	if err := DB.AutoMigrate(&models.User{}); err != nil {
 		return nil, err
 	}
-
+	log.Println("Database connected successfully")
 	return DB, nil
 }

@@ -1,17 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"goofyah/config"
 	"goofyah/database"
 	"goofyah/routes"
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	config.LoadConfig()
-	db, err := database.Connect()
+	db, err := database.Setup()
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Println("Error:", err)
 		return
 	}
 

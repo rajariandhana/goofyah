@@ -1,0 +1,29 @@
+{{ template "guest.header.html" . }}
+
+<form method="POST" action="/login" class="flex flex-col p-4 w-96">
+    <div class="mb-2">
+        <label for="email" class="block text-sm font-medium">Your email</label>
+        <input type="email" name="email" placeholder="john@example.com" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
+    </div>
+    <div class="mb-2">
+        <label for="password" class="block text-sm font-medium ">Your password</label>
+        <input type="password" name="password" placeholder="Strongpassword123" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
+    </div>
+    <button type="submit" class="w-full text-white bg-sky-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center my-4 focus:ring-sky-500 focus:border-sky-500">Login</button>
+    <a href="/register" class="underline text-sky-500 text-center">Create an account</a>
+</form>
+
+<!-- <div class="bg-white rounded-md shadow-md px-4 py-2">
+    {{if .users}}
+        <ul class="list-disc ml-4">
+            {{range .users}}
+                <li>
+                    {{ .Name }} {{ .Email }} {{.Password }}
+                </li>
+            {{end}}
+        </ul>
+    {{else}}
+        <p>No users available.</p>
+    {{end}}
+</div> -->
+{{ template "guest.footer.html" . }}
