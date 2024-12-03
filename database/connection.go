@@ -19,6 +19,9 @@ func Setup() (*gorm.DB, error) {
 	if err := DB.AutoMigrate(&models.User{}); err != nil {
 		return nil, err
 	}
+	if err := DB.AutoMigrate(&models.Goal{}); err != nil {
+		return nil, err
+	}
 	log.Println("Database connected successfully")
 	return DB, nil
 }
