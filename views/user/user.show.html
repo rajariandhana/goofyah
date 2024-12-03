@@ -1,7 +1,6 @@
 {{ template "header.html" . }}
 
-<form method="POST" action="/user" class="flex flex-col p-4 w-96"></form>
-
+<form method="POST" action="/user" class="flex flex-col p-4 pb-0 w-96">
     <div class="mb-2">
         <label for="name" class="block text-sm font-medium">Name</label>
         <input type="text" name="name" value="{{ .user.Name }}" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
@@ -14,10 +13,9 @@
         <label for="password" class="block text-sm font-medium ">Password</label>
         <input type="password" name="password" placeholder="New password" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
     </div>
-    <button type="submit" class="w-full text-white bg-sky-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center my-4 focus:ring-sky-500 focus:border-sky-500">Register</button>
-    <a href="/login" class="underline text-zinc-500 text-center">Login instead</a>
+    <button type="submit" class="bg-green-500 px-4 py-2 rounded-md shadow-md text-white font-medium w-full mt-2">Update</button>
 </form>
-<form method="POST" action="/logout"></form>
-    <button type="submit" class="bg-red-500 px-4 py-2 rounded-md shadow-md text-white font-medium">Logout</button>
+<form method="POST" action="/logout" class="flex w-96 px-4 items-start">
+    <button type="submit" class="bg-red-500 px-4 py-2 rounded-md shadow-md text-white font-medium w-full">Logout</button>
 </form>
 {{ template "footer.html" . }}
