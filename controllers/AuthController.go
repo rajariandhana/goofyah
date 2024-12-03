@@ -1,16 +1,14 @@
 package controllers
 
 import (
+	"errors"
+	"fmt"
 	"goofyah/models"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -23,14 +21,30 @@ func NewAuthController(db *gorm.DB) *AuthController {
 	return &AuthController{DB: db}
 }
 
-func (ac *AuthController) Register(c *gin.Context) {
+func (ac *AuthController) RegisterCreate(c *gin.Context) {
+	users := ac.GetAllUser()
+	c.HTML(http.StatusOK, "register.html", gin.H{
+		"title": "Register",
+		"users": users,
+	})
+}
+
+func (ac *AuthController) RegisterStore(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf(user.Name + "|" + user.Email + "|" + user.Password)
+	// log.Printf(user.Name + "|" + user.Email + "|" + user.Password)
 	// check if email taken
+	existingUser, err := ac.GetUserByEmail(user.Email)
+	if err == nil && existingUser != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already taken"})
+		return
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check email"})
+		return
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
@@ -45,42 +59,26 @@ func (ac *AuthController) Register(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/login")
 }
 
+func (ac *AuthController) LoginCreate(c *gin.Context) {
+	users := ac.GetAllUser()
+	c.HTML(http.StatusOK, "login.html", gin.H{
+		"title": "Login",
+		"users": users,
+	})
+}
+
 type LoginInput struct {
 	Email    string `form:"email" binding:"required,email"`
 	Password string `form:"password" binding:"required"`
 }
 
-func (ac *AuthController) Login(c *gin.Context) {
+func (ac *AuthController) LoginStore(c *gin.Context) {
 	var loginInput LoginInput
-
-	if err := c.ShouldBindWith(&loginInput, binding.Form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	// log.Printf("Email: %s, Password: %s\n", loginInput.Email, loginInput.Password)
-
-	user, err := ac.GetUserByEmail(loginInput.Email)
-	if err != nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginInput.Password)) != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	if err := c.ShouldBind(&loginInput); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour).Unix(),
-	})
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
-	c.Redirect(http.StatusFound, "/")
-}
-
-func (ac *AuthController) Login2(c *gin.Context) {
-	var loginInput LoginInput
 	var user models.User
 	if err := ac.DB.Where("email = ?", loginInput.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
@@ -95,60 +93,21 @@ func (ac *AuthController) Login2(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
-
 	session := sessions.Default(c)
 	session.Set("userID", user.ID)
 	session.Save()
-	c.Redirect(http.StatusTemporaryRedirect, "/")
+	c.Redirect(http.StatusFound, "/")
 }
 
-func (ac *AuthController) RegisterCreate(c *gin.Context) {
-	users := ac.GetAllUser()
-	c.HTML(http.StatusOK, "register.html", gin.H{
-		"title": "Register",
-		"users": users,
-	})
-}
-
-func (ac *AuthController) LoginCreate(c *gin.Context) {
-	users := ac.GetAllUser()
-	c.HTML(http.StatusOK, "login.html", gin.H{
-		"title": "Login",
-		"users": users,
-	})
-}
-
-func (ac *AuthController) Logout(c *gin.Context) {
-	c.SetCookie("Authorization", "", -1, "", "", false, true)
-	c.Redirect(http.StatusFound, "/login")
-}
-
-func (ac *AuthController) Logou2(c *gin.Context) {
+func (ac *AuthController) LogoutStore(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
 	session.Save()
-}
-
-func (ac *AuthController) Index(c *gin.Context) {
-	session := sessions.Default(c)
-	if session.Get("loggedIn") == nil || session.Get("loggedIn") != true {
-		c.Redirect(http.StatusSeeOther, "/login")
-		return
-	}
-
-	c.HTML(http.StatusOK, "index.html", gin.H{})
+	c.Redirect(http.StatusFound, "/login")
 }
 
 func (ac *AuthController) CreateUser(u *models.User) error {
 	return ac.DB.Create(u).Error
-}
-
-func (ac *AuthController) GetUserByEmail(email string) (*models.User, error) {
-	var user models.User
-	if err := ac.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		return nil, err
-	}
-	return &user, nil
 }
 
 func (ac *AuthController) GetAllUser() []models.User {
@@ -161,19 +120,39 @@ func (ac *AuthController) GetAllUser() []models.User {
 	return users
 }
 
+func (ac *AuthController) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	if err := ac.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (ac *AuthController) GetUserByID(id uint) (*models.User, error) {
+	var user models.User
+	if err := ac.DB.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user with ID %d not found", id)
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (ac *AuthController) Show(c *gin.Context) {
-	user, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found in context"})
+	session := sessions.Default(c)
+	userID := session.Get("userID")
+	if userID == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	userObj, ok := user.(models.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User data type mismatch"})
+	user, err := ac.GetUserByID(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 	c.HTML(http.StatusOK, "user.show.html", gin.H{
 		"title": "Login",
-		"user":  userObj,
+		"user":  user,
 	})
 }

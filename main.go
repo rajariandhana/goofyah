@@ -5,9 +5,14 @@ import (
 	"goofyah/database"
 	"goofyah/routes"
 	"log"
+	"os"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/joho/godotenv"
 )
+
+// var store sessions.Store
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -19,7 +24,11 @@ func main() {
 		log.Println("Error:", err)
 		return
 	}
-
-	router := routes.SetupRoutes(db)
+	store := cookie.NewStore([]byte(os.Getenv("SECRET")))
+	store.Options(sessions.Options{
+		MaxAge:   300,
+		HttpOnly: true,
+	})
+	router := routes.SetupRoutes(db, store)
 	router.Run(":8080")
 }
