@@ -18,7 +18,6 @@ import (
 func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 	router := gin.Default()
 	router.Use(sessions.Sessions("this_session", store))
-
 	// router.LoadHTMLGlob("views/*.html")
 	// router.LoadHTMLGlob("views/user/*.html")
 	// router.LoadHTMLFiles("views/header.html", "views/footerr.html", "views/index.html")

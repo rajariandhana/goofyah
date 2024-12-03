@@ -22,37 +22,55 @@ func NewAuthController(db *gorm.DB) *AuthController {
 }
 
 func (ac *AuthController) RegisterCreate(c *gin.Context) {
-	users := ac.GetAllUser()
 	c.HTML(http.StatusOK, "register.html", gin.H{
 		"title": "Register",
-		"users": users,
 	})
 }
 
 func (ac *AuthController) RegisterStore(c *gin.Context) {
 	var user models.User
+	err_n := 0
+	err_invalid_input := ""
+	err_email_taken := ""
+	err_email_fail := ""
+	err_user_fail_create := ""
+
 	if err := c.ShouldBind(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		err_invalid_input = "Invalid input data"
+		err_n++
 	}
 	// log.Printf(user.Name + "|" + user.Email + "|" + user.Password)
-	// check if email taken
 	existingUser, err := ac.GetUserByEmail(user.Email)
 	if err == nil && existingUser != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already taken"})
-		return
+		err_email_taken = "Email is already taken"
+		err_n++
 	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check email"})
-		return
+		err_email_fail = "Failed to check email"
+		err_n++
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
-		return
+
+	if err_n == 0 {
+		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			err_user_fail_create = "Failed to create user"
+			err_n++
+		}
+		user.Password = string(hash)
+		if err = ac.CreateUser(&user); err != nil {
+			err_user_fail_create = "Failed to create user"
+			err_n++
+		}
 	}
-	user.Password = string(hash)
-	if err := ac.CreateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	if err_n > 0 {
+		c.HTML(http.StatusBadRequest, "register.html", gin.H{
+			"title":                "Register",
+			"user":                 user,
+			"err_invalid_input":    err_invalid_input,
+			"err_email_taken":      err_email_taken,
+			"err_email_fail":       err_email_fail,
+			"err_user_fail_create": err_user_fail_create,
+		})
 		return
 	}
 
@@ -60,10 +78,8 @@ func (ac *AuthController) RegisterStore(c *gin.Context) {
 }
 
 func (ac *AuthController) LoginCreate(c *gin.Context) {
-	users := ac.GetAllUser()
 	c.HTML(http.StatusOK, "login.html", gin.H{
 		"title": "Login",
-		"users": users,
 	})
 }
 
@@ -74,25 +90,36 @@ type LoginInput struct {
 
 func (ac *AuthController) LoginStore(c *gin.Context) {
 	var loginInput LoginInput
+	err_n := 0
+	err_invalid_input := ""
+	err_email_not_found := ""
+	err_password_wrong := ""
 	if err := c.ShouldBind(&loginInput); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
-		return
+		err_invalid_input = "Invalid input data"
+		err_n++
 	}
 
 	var user models.User
 	if err := ac.DB.Where("email = ?", loginInput.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
+		err_email_not_found = "Email not found"
+		err_n++
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginInput.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		err_password_wrong = "Wrong password"
+		err_n++
+	}
+
+	if err_n > 0 {
+		c.HTML(http.StatusBadRequest, "login.html", gin.H{
+			"title":               "Login",
+			"user":                user,
+			"err_invalid_input":   err_invalid_input,
+			"err_email_not_found": err_email_not_found,
+			"err_password_wrong":  err_password_wrong,
+		})
 		return
 	}
 
-	if user.ID == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
 	session := sessions.Default(c)
 	session.Set("userID", user.ID)
 	session.Save()
@@ -116,7 +143,7 @@ func (ac *AuthController) GetAllUser() []models.User {
 		log.Printf("Error fetching users: %v", err)
 		return []models.User{}
 	}
-	log.Println("success get all")
+	// log.Println("success get all")
 	return users
 }
 
