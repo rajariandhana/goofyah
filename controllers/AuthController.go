@@ -169,17 +169,101 @@ func (ac *AuthController) GetUserByID(id uint) (*models.User, error) {
 func (ac *AuthController) Show(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("userID")
+	log.Println("er1")
 	if userID == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
+	log.Println("er2")
 	user, err := ac.GetUserByID(userID.(uint))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
+	log.Println("er3")
 	c.HTML(http.StatusOK, "user.show.html", gin.H{
 		"title": "Login",
 		"user":  user,
 	})
+}
+
+type UpdateInput struct {
+	Name     string `form:"name" binding:"required"`
+	Email    string `form:"email" binding:"email"`
+	Password string `form:"password"`
+}
+
+func (ac *AuthController) Update(c *gin.Context) {
+	err_n := 0
+	err_updating := ""
+	err_email_taken := ""
+	err_email_fail := ""
+	success := ""
+
+	var updateInput UpdateInput
+	if err := c.ShouldBind(&updateInput); err != nil {
+		log.Println(err.Error())
+		return
+	}
+	// get user
+	session := sessions.Default(c)
+	userID := session.Get("userID")
+	user, err := ac.GetUserByID(userID.(uint))
+	if err != nil {
+		// c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		err_updating = "Failed to update user"
+		err_n++
+	}
+
+	if updateInput.Name != "" {
+		user.Name = updateInput.Name
+	}
+	if updateInput.Email != user.Email {
+		existingUser, err := ac.GetUserByEmail(user.Email)
+		if err == nil && existingUser != nil {
+			err_email_taken = "Email is already taken"
+			err_n++
+		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			err_email_fail = "Failed to check email"
+			err_n++
+		}
+		user.Email = updateInput.Email
+	}
+	if updateInput.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(updateInput.Password), bcrypt.DefaultCost)
+		if err != nil {
+
+		}
+		user.Password = string(hash)
+	}
+
+	if err_n > 0 {
+		c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
+			"title":           "user.show",
+			"user":            user,
+			"err_updating":    err_updating,
+			"err_email_taken": err_email_taken,
+			"err_email_fail":  err_email_fail,
+		})
+		return
+	}
+
+	if err := ac.DB.Save(&user).Error; err != nil {
+		err_updating = "Failed to update user"
+		c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
+			"title":        "user.show",
+			"user":         user,
+			"err_updating": err_updating,
+		})
+		return
+	}
+
+	success = "Information successfully updated"
+	c.HTML(http.StatusFound, "user.show.html", gin.H{
+		"title":   "user.show",
+		"user":    user,
+		"success": success,
+	})
+	// c.Redirect(http.StatusFound, "/account")
+
 }

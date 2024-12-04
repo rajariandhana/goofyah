@@ -56,8 +56,6 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 	authRoutes := router.Group("/")
 	authRoutes.Use(middleware.AuthMiddleware())
 	{
-		authRoutes.POST("/logout", authController.LogoutStore)
-
 		authRoutes.GET("/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "index.html", gin.H{
 				"title": "Home",
@@ -69,6 +67,8 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 		accountRoutes := authRoutes.Group("/account")
 		{
 			accountRoutes.GET("/", authController.Show)
+			accountRoutes.POST("/update", authController.Update)
+			accountRoutes.POST("/logout", authController.LogoutStore)
 		}
 		goalRoutes := authRoutes.Group("/goals")
 		{
