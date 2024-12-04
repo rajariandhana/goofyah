@@ -6,6 +6,7 @@ import (
 	"goofyah/models"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -188,24 +189,23 @@ func (ac *AuthController) Show(c *gin.Context) {
 }
 
 type UpdateInput struct {
-	Name     string `form:"name" binding:"required"`
+	Name     string `form:"name"`
 	Email    string `form:"email" binding:"email"`
 	Password string `form:"password"`
 }
 
 func (ac *AuthController) Update(c *gin.Context) {
-	err_n := 0
-	err_updating := ""
-	err_email_taken := ""
-	err_email_fail := ""
-	success := ""
-
 	var updateInput UpdateInput
 	if err := c.ShouldBind(&updateInput); err != nil {
 		log.Println(err.Error())
 		return
 	}
-	// get user
+
+	err_n := 0
+	err_name := ""
+	err_email := ""
+	err_updating := ""
+
 	session := sessions.Default(c)
 	userID := session.Get("userID")
 	user, err := ac.GetUserByID(userID.(uint))
@@ -215,20 +215,21 @@ func (ac *AuthController) Update(c *gin.Context) {
 		err_n++
 	}
 
-	if updateInput.Name != "" {
+	if updateInput.Name == "" {
+		err_name = "Invalid name"
+		err_n++
+	} else {
 		user.Name = updateInput.Name
 	}
-	if updateInput.Email != user.Email {
-		existingUser, err := ac.GetUserByEmail(user.Email)
-		if err == nil && existingUser != nil {
-			err_email_taken = "Email is already taken"
-			err_n++
-		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			err_email_fail = "Failed to check email"
-			err_n++
-		}
+
+	mes := ac.EmailValid(updateInput.Email, user.Email)
+	if mes != "" {
+		err_email = mes
+		err_n++
+	} else {
 		user.Email = updateInput.Email
 	}
+
 	if updateInput.Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(updateInput.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -239,11 +240,11 @@ func (ac *AuthController) Update(c *gin.Context) {
 
 	if err_n > 0 {
 		c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
-			"title":           "user.show",
-			"user":            user,
-			"err_updating":    err_updating,
-			"err_email_taken": err_email_taken,
-			"err_email_fail":  err_email_fail,
+			"title":        "user.show",
+			"user":         user,
+			"err_updating": err_updating,
+			"err_name":     err_name,
+			"err_email":    err_email,
 		})
 		return
 	}
@@ -258,12 +259,36 @@ func (ac *AuthController) Update(c *gin.Context) {
 		return
 	}
 
-	success = "Information successfully updated"
+	success := "Information successfully updated"
 	c.HTML(http.StatusFound, "user.show.html", gin.H{
 		"title":   "user.show",
 		"user":    user,
 		"success": success,
 	})
-	// c.Redirect(http.StatusFound, "/account")
-
 }
+
+func (ac *AuthController) EmailValid(email string, userEmail string) string {
+	re := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	match, _ := regexp.MatchString(re, email)
+	msg := ""
+	if match == false {
+		msg = "Invalid email"
+	} else if email != userEmail {
+		existingUser, err := ac.GetUserByEmail(userEmail)
+		if err == nil && existingUser != nil {
+			msg = "Email is already taken"
+		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			msg = "Failed to check email"
+		}
+	}
+	return msg
+}
+
+/*
+if empty
+name cannot be empty
+email is not valid
+email is taken
+
+minimum of 8 characters
+*/

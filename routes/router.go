@@ -52,23 +52,22 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 		unauthRoutes.POST("/register", authController.RegisterStore)
 	}
 
-	var list = []string{"anies", "prabowo", "ganjar"}
 	authRoutes := router.Group("/")
+
 	authRoutes.Use(middleware.AuthMiddleware())
 	{
 		authRoutes.GET("/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "index.html", gin.H{
 				"title": "Home",
-				"list":  list,
 			})
 		})
 
 		// contoh
 		accountRoutes := authRoutes.Group("/account")
 		{
-			accountRoutes.GET("/", authController.Show)
+			accountRoutes.GET("", authController.Show)
 			accountRoutes.POST("/update", authController.Update)
-			accountRoutes.POST("/logout", authController.LogoutStore)
+			authRoutes.POST("/logout", authController.LogoutStore)
 		}
 		goalRoutes := authRoutes.Group("/goals")
 		{
