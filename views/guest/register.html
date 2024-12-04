@@ -5,26 +5,26 @@
     <div class="mb-2">
         <label for="name" class="block text-sm font-medium">Name</label>
         <input type="text" name="name" placeholder="John Doe" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
+        {{ if .err_name }}
+            <span class="text-red-500 text-sm">{{ .err_name }}</span>
+        {{ end }}
     </div>
     <div class="mb-2">
         <label for="email" class="block text-sm font-medium">Email</label>
         <input type="email" name="email" placeholder="john@example.com" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
-        {{ if .err_email_taken }}
-            <span class="text-red-500 text-sm">{{ .err_email_taken }}</span>
-        {{ end }}
-        {{ if .err_email_fail }}
-            <span class="text-red-500 text-sm">{{ .err_email_fail }}</span>
+        {{ if .err_email }}
+            <span class="text-red-500 text-sm">{{ .err_email }}</span>
         {{ end }}
     </div>
     <div class="mb-2">
         <label for="password" class="block text-sm font-medium ">Password</label>
         <input type="password" name="password" placeholder="Strongpassword123" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
+        {{ if .err_password }}
+            <span class="text-red-500 text-sm">{{ .err_password }}</span>
+        {{ end }}
     </div>
-    {{ if .err_invalid_input }}
-        <span class="text-red-500 text-sm">{{ .err_invalid_input }}</span>
-    {{ end }}
-    {{ if .err_user_fail_create }}
-        <span class="text-red-500 text-sm">{{ .err_user_fail_create }}</span>
+    {{ if .err_storing }}
+        <span class="text-red-500 text-sm">{{ .err_storing }}</span>
     {{ end }}
 
     <button type="submit" class="w-full text-white bg-sky-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center my-4 focus:ring-sky-500 focus:border-sky-500">Register</button>

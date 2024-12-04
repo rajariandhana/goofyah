@@ -4,20 +4,17 @@
     <div class="mb-2">
         <label for="email" class="block text-sm font-medium">Your email</label>
         <input type="email" name="email" placeholder="john@example.com" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
-        {{ if .err_email_not_found }}
-            <span class="text-red-500 text-sm">{{ .err_email_not_found }}</span>
+        {{ if .err_email }}
+            <span class="text-red-500 text-sm">{{ .err_email }}</span>
         {{ end }}
     </div>
     <div class="mb-2">
         <label for="password" class="block text-sm font-medium ">Your password</label>
         <input type="password" name="password" placeholder="Strongpassword123" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
-        {{ if .err_password_wrong }}
-            <span class="text-red-500 text-sm">{{ .err_password_wrong }}</span>
+        {{ if .err_password }}
+            <span class="text-red-500 text-sm">{{ .err_password }}</span>
         {{ end }}
     </div>
-    {{ if .err_invalid_input }}
-        <span class="text-red-500 text-sm">{{ .err_invalid_input }}</span>
-    {{ end }}
     <button type="submit" class="w-full text-white bg-sky-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center my-4 focus:ring-sky-500 focus:border-sky-500">Login</button>
     <a href="/register" class="underline text-zinc-500 text-center">Create an account</a>
 </form>

@@ -4,6 +4,7 @@ import (
 	"goofyah/config"
 	"goofyah/database"
 	"goofyah/routes"
+	"goofyah/seeder"
 	"log"
 	"os"
 
@@ -29,6 +30,7 @@ func main() {
 		MaxAge:   300,
 		HttpOnly: true,
 	})
+	seeder.SeedUser(db)
 	router := routes.SetupRoutes(db, store)
 	router.Run(":8080")
 }

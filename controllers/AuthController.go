@@ -22,6 +22,12 @@ func NewAuthController(db *gorm.DB) *AuthController {
 	return &AuthController{DB: db}
 }
 
+type FormInput struct {
+	Name     string `form:"name"`
+	Email    string `form:"email"`
+	Password string `form:"password"`
+}
+
 func (ac *AuthController) RegisterCreate(c *gin.Context) {
 	c.HTML(http.StatusOK, "register.html", gin.H{
 		"title": "Register",
@@ -29,53 +35,57 @@ func (ac *AuthController) RegisterCreate(c *gin.Context) {
 }
 
 func (ac *AuthController) RegisterStore(c *gin.Context) {
-	var user models.User
-	err_n := 0
-	err_invalid_input := ""
-	err_email_taken := ""
-	err_email_fail := ""
-	err_user_fail_create := ""
-
-	if err := c.ShouldBind(&user); err != nil {
-		err_invalid_input = "Invalid input data"
-		err_n++
-	}
-	// log.Printf(user.Name + "|" + user.Email + "|" + user.Password)
-	existingUser, err := ac.GetUserByEmail(user.Email)
-	if err == nil && existingUser != nil {
-		err_email_taken = "Email is already taken"
-		err_n++
-	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		err_email_fail = "Failed to check email"
-		err_n++
-	}
-
-	if err_n == 0 {
-		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-		if err != nil {
-			err_user_fail_create = "Failed to create user"
-			err_n++
-		}
-		user.Password = string(hash)
-		if err = ac.CreateUser(&user); err != nil {
-			err_user_fail_create = "Failed to create user"
-			err_n++
-		}
-	}
-
-	if err_n > 0 {
-		c.HTML(http.StatusBadRequest, "register.html", gin.H{
-			"title":                "Register",
-			"user":                 user,
-			"err_invalid_input":    err_invalid_input,
-			"err_email_taken":      err_email_taken,
-			"err_email_fail":       err_email_fail,
-			"err_user_fail_create": err_user_fail_create,
-		})
+	var input FormInput
+	if err := c.ShouldBind(&input); err != nil {
+		log.Println(err.Error())
 		return
 	}
 
-	c.Redirect(http.StatusFound, "/login")
+	err_name := ""
+	err_email := ""
+	err_password := ""
+	err_storing := ""
+	var user models.User
+
+	if input.Name == "" {
+		err_name = "Invalid name"
+	} else {
+		user.Name = input.Name
+	}
+
+	mes := ac.EmailValid(input.Email, "")
+	if mes != "" {
+		err_email = mes
+	} else {
+		user.Email = input.Email
+	}
+
+	if input.Password == "" {
+		err_password = "Invalid password"
+	} else if input.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+		if err != nil {
+
+		}
+		user.Password = string(hash)
+	}
+
+	if err_name == "" || err_email == "" || err_password == "" {
+		if err := ac.DB.Create(&user).Error; err == nil {
+			c.Redirect(http.StatusFound, "/login")
+			return
+		}
+		err_storing = "Failed to create user"
+	}
+
+	c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
+		"title":        "user.show",
+		"user":         user,
+		"err_storing":  err_storing,
+		"err_email":    err_email,
+		"err_name":     err_name,
+		"err_password": err_password,
+	})
 }
 
 func (ac *AuthController) LoginCreate(c *gin.Context) {
@@ -84,47 +94,57 @@ func (ac *AuthController) LoginCreate(c *gin.Context) {
 	})
 }
 
-type LoginInput struct {
-	Email    string `form:"email" binding:"required,email"`
-	Password string `form:"password" binding:"required"`
-}
-
 func (ac *AuthController) LoginStore(c *gin.Context) {
-	var loginInput LoginInput
-	err_n := 0
-	err_invalid_input := ""
-	err_email_not_found := ""
-	err_password_wrong := ""
-	if err := c.ShouldBind(&loginInput); err != nil {
-		err_invalid_input = "Invalid input data"
-		err_n++
-	}
+	var input FormInput
 
-	var user models.User
-	if err := ac.DB.Where("email = ?", loginInput.Email).First(&user).Error; err != nil {
-		err_email_not_found = "Email not found"
-		err_n++
-	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginInput.Password)); err != nil {
-		err_password_wrong = "Wrong password"
-		err_n++
-	}
-
-	if err_n > 0 {
-		c.HTML(http.StatusBadRequest, "login.html", gin.H{
-			"title":               "Login",
-			"user":                user,
-			"err_invalid_input":   err_invalid_input,
-			"err_email_not_found": err_email_not_found,
-			"err_password_wrong":  err_password_wrong,
-		})
+	if err := c.ShouldBind(&input); err != nil {
+		log.Println(err.Error())
 		return
 	}
 
-	session := sessions.Default(c)
-	session.Set("userID", user.ID)
-	session.Save()
-	c.Redirect(http.StatusFound, "/")
+	err_email := ""
+	err_password := ""
+
+	var user models.User
+
+	if input.Password==""{
+		err_password = "Password cannot be empty"
+	}
+	
+	mes := ac.EmailValid(input.Email, "")
+	log.Println("email is " + input.Email)
+	if mes != "" {
+		err_email = mes
+	} else {
+		log.Println("email valid")
+		user, err := ac.GetUserByEmail(input.Email)
+
+		if err == nil && user != nil {
+			user.Email = input.Email
+		} else {
+			err_email = "Failed to get email"
+		}
+	}
+
+	 else if{
+
+	}
+
+	if err_email == "" && err_password == "" {
+		session := sessions.Default(c)
+		session.Set("userID", user.ID)
+		session.Save()
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	c.HTML(http.StatusBadRequest, "login.html", gin.H{
+		"title":        "Login",
+		"user":         user,
+		"err_email":    err_email,
+		"err_password": err_password,
+	})
+
 }
 
 func (ac *AuthController) LogoutStore(c *gin.Context) {
@@ -170,38 +190,28 @@ func (ac *AuthController) GetUserByID(id uint) (*models.User, error) {
 func (ac *AuthController) Show(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("userID")
-	log.Println("er1")
 	if userID == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	log.Println("er2")
 	user, err := ac.GetUserByID(userID.(uint))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	log.Println("er3")
 	c.HTML(http.StatusOK, "user.show.html", gin.H{
 		"title": "Login",
 		"user":  user,
 	})
 }
 
-type UpdateInput struct {
-	Name     string `form:"name"`
-	Email    string `form:"email" binding:"email"`
-	Password string `form:"password"`
-}
-
 func (ac *AuthController) Update(c *gin.Context) {
-	var updateInput UpdateInput
+	var updateInput FormInput
 	if err := c.ShouldBind(&updateInput); err != nil {
 		log.Println(err.Error())
 		return
 	}
 
-	err_n := 0
 	err_name := ""
 	err_email := ""
 	err_updating := ""
@@ -210,14 +220,11 @@ func (ac *AuthController) Update(c *gin.Context) {
 	userID := session.Get("userID")
 	user, err := ac.GetUserByID(userID.(uint))
 	if err != nil {
-		// c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		err_updating = "Failed to update user"
-		err_n++
 	}
 
 	if updateInput.Name == "" {
 		err_name = "Invalid name"
-		err_n++
 	} else {
 		user.Name = updateInput.Name
 	}
@@ -225,7 +232,6 @@ func (ac *AuthController) Update(c *gin.Context) {
 	mes := ac.EmailValid(updateInput.Email, user.Email)
 	if mes != "" {
 		err_email = mes
-		err_n++
 	} else {
 		user.Email = updateInput.Email
 	}
@@ -238,40 +244,34 @@ func (ac *AuthController) Update(c *gin.Context) {
 		user.Password = string(hash)
 	}
 
-	if err_n > 0 {
-		c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
-			"title":        "user.show",
-			"user":         user,
-			"err_updating": err_updating,
-			"err_name":     err_name,
-			"err_email":    err_email,
-		})
-		return
-	}
-
-	if err := ac.DB.Save(&user).Error; err != nil {
+	if err_updating == "" && err_email == "" && err_name == "" {
+		if err := ac.DB.Save(&user).Error; err == nil {
+			success := "Information successfully updated"
+			c.HTML(http.StatusFound, "user.show.html", gin.H{
+				"title":   "user.show",
+				"user":    user,
+				"success": success,
+			})
+			return
+		}
 		err_updating = "Failed to update user"
-		c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
-			"title":        "user.show",
-			"user":         user,
-			"err_updating": err_updating,
-		})
-		return
 	}
 
-	success := "Information successfully updated"
-	c.HTML(http.StatusFound, "user.show.html", gin.H{
-		"title":   "user.show",
-		"user":    user,
-		"success": success,
+	c.HTML(http.StatusBadRequest, "user.show.html", gin.H{
+		"title":        "user.show",
+		"user":         user,
+		"err_updating": err_updating,
+		"err_name":     err_name,
+		"err_email":    err_email,
 	})
 }
 
 func (ac *AuthController) EmailValid(email string, userEmail string) string {
+	log.Println("emailvalid " + email)
 	re := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	match, _ := regexp.MatchString(re, email)
 	msg := ""
-	if match == false {
+	if !match {
 		msg = "Invalid email"
 	} else if email != userEmail {
 		existingUser, err := ac.GetUserByEmail(userEmail)
