@@ -16,6 +16,7 @@ func NewCategoriesController(db *gorm.DB) *CategoriesController {
 	return &CategoriesController{DB: db}
 }
 
+// Display all categories
 func (uc *CategoriesController) Index(c *gin.Context) {
 	var categories []models.Categories
 	if err := uc.DB.Find(&categories).Error; err != nil {
@@ -24,13 +25,25 @@ func (uc *CategoriesController) Index(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "categories.index.html", gin.H{
-		"title":      "categories",
+		"title":      "List of Categories",
 		"categories": categories,
 	})
 }
 
-func (gc *CategoriesController) CategoriesPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "categories.index.html", gin.H{
-		"title": "List of Categories",
-	})
+// Handle category creation
+func (uc *CategoriesController) CreateCategory(c *gin.Context) {
+	var category models.Categories
+	if err := c.ShouldBind(&category); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	// Save the category to the database
+	if err := uc.DB.Create(&category).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save category"})
+		return
+	}
+
+	// Redirect to the categories page to display the updated list
+	c.Redirect(http.StatusSeeOther, "/categories/listcategories")
 }

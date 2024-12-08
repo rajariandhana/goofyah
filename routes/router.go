@@ -81,11 +81,12 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 		}
 		categoriesRoutes := authRoutes.Group("/categories")
 		{
-			categoriesRoutes.GET("/", categoriesController.Index)
-			categoriesRoutes.GET("/listcategories", categoriesController.CategoriesPage)
-		}
-		// }
+			categoriesRoutes.GET("/listcategories", categoriesController.Index)           // GET request to fetch and display categories at /categories/listcategories
+			categoriesRoutes.POST("/listcategories", categoriesController.CreateCategory) // POST request to create a new category at /categories/listcategories
 
-		return router
+		}
 	}
+	// }
+
+	return router
 }
