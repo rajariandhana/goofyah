@@ -18,7 +18,6 @@ import (
 func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 	router := gin.Default()
 	router.Use(sessions.Sessions("this_session", store))
-
 	// router.LoadHTMLGlob("views/*.html")
 	// router.LoadHTMLGlob("views/user/*.html")
 	// router.LoadHTMLFiles("views/header.html", "views/footerr.html", "views/index.html")
@@ -54,27 +53,26 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 		unauthRoutes.POST("/register", authController.RegisterStore)
 	}
 
-	var list = []string{"anies", "prabowo", "ganjar"}
 	authRoutes := router.Group("/")
+
 	authRoutes.Use(middleware.AuthMiddleware())
 	{
-		authRoutes.POST("/logout", authController.LogoutStore)
-
 		authRoutes.GET("/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "index.html", gin.H{
 				"title": "Home",
-				"list":  list,
 			})
 		})
 
 		// contoh
 		accountRoutes := authRoutes.Group("/account")
 		{
-			accountRoutes.GET("/", authController.Show)
+			accountRoutes.GET("", authController.Show)
+			accountRoutes.POST("/update", authController.Update)
+			accountRoutes.POST("/logout", authController.LogoutStore)
 		}
-		goalRoutes := authRoutes.Group("/goals")
+		goalRoutes := authRoutes.Group("goals")
 		{
-			goalRoutes.GET("/", goalController.Index)
+			goalRoutes.GET("", goalController.Index)
 			goalRoutes.GET("/addNewGoal", goalController.NewGoalSingle)
 			goalRoutes.POST("/addNewGoal", goalController.AddGoal)
 			// goalRoutes.GET("/:id", goalController.Show)

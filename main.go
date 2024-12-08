@@ -4,7 +4,9 @@ import (
 	"goofyah/config"
 	"goofyah/database"
 	"goofyah/routes"
+	"goofyah/seeder"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-contrib/sessions"
@@ -26,9 +28,12 @@ func main() {
 	}
 	store := cookie.NewStore([]byte(os.Getenv("SECRET")))
 	store.Options(sessions.Options{
+		Path:     "/",
 		MaxAge:   300,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	})
+	seeder.SeedUser(db)
 	router := routes.SetupRoutes(db, store)
 	router.Run(":8080")
 }

@@ -1,21 +1,34 @@
 {{ template "header.html" . }}
 
-<form method="POST" action="/user" class="flex flex-col p-4 pb-0 w-96">
+<form method="POST" action="/account/update" class="flex flex-col p-4 pb-0 w-96">
     <div class="mb-2">
         <label for="name" class="block text-sm font-medium">Name</label>
         <input type="text" name="name" value="{{ .user.Name }}" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
+        {{ if .err_name }}
+            <span class="text-red-500 text-sm">{{ .err_name }}</span>
+        {{ end }}
     </div>
     <div class="mb-2">
         <label for="email" class="block text-sm font-medium">Email</label>
         <input type="email" name="email" value="{{ .user.Email }}" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
+        {{ if .err_email }}
+            <span class="text-red-500 text-sm">{{ .err_email }}</span>
+        {{ end }}
     </div>
     <div class="mb-2">
         <label for="password" class="block text-sm font-medium ">Password</label>
         <input type="password" name="password" placeholder="New password" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
     </div>
-    <button type="submit" class="bg-green-500 px-4 py-2 rounded-md shadow-md text-white font-medium w-full mt-2">Update</button>
+    {{ if .success }}
+        <span class="text-green-500 text-sm">{{ .success }}</span>
+    {{ end }}
+    {{ if .err_updating }}
+        <span class="text-red-500 text-sm">{{ .err_updating }}</span>
+    {{ end }}
+    <button type="submit" class="bg-sky-500 px-4 py-2 rounded-md shadow-md text-white font-medium w-full mt-2">Update Information</button>
 </form>
-<form method="POST" action="/logout" class="flex w-96 px-4 items-start">
-    <button type="submit" class="bg-red-500 px-4 py-2 rounded-md shadow-md text-white font-medium w-full">Logout</button>
+<form method="POST" action="/account/logout" class="flex w-96 px-4 items-start justify-center">
+    <button type="submit" class="border-[1px] border-sky-500 text-sky-500 px-4 py-2 rounded-md shadow-md bg-sky-100 font-medium w-full">Logout</button>
 </form>
+
 {{ template "footer.html" . }}
