@@ -42,6 +42,7 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 	router.LoadHTMLFiles(htmlFiles...)
 	authController := controllers.NewAuthController(db)
 	goalController := controllers.NewGoalController(db)
+	categoriesController := controllers.NewCategoriesController(db)
 
 	unauthRoutes := router.Group("/")
 	unauthRoutes.Use(middleware.UnauthMiddleware())
@@ -77,6 +78,11 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 			goalRoutes.GET("/addNewGoal", goalController.NewGoalSingle)
 			goalRoutes.POST("/addNewGoal", goalController.AddGoal)
 			// goalRoutes.GET("/:id", goalController.Show)
+		}
+		categoriesRoutes := authRoutes.Group("/categories")
+		{
+			categoriesRoutes.GET("/", categoriesController.Index)
+			categoriesRoutes.GET("/listcategories", categoriesController.CategoriesPage)
 		}
 		// }
 
