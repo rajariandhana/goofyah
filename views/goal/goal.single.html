@@ -1,28 +1,28 @@
 {{ template "header.html" . }}
 
 <div class="max-w-6xl mx-auto mt-10">
-    <h1 class="text-3xl font-bold mb-6">Add New Goal</h1>
-    <form method="POST" action="/goals" class="bg-white p-8 rounded shadow-md">
+    <h1 class="mb-6 text-3xl font-bold">Add New Goal</h1>
+    <form method="POST" action="/goals/addNewGoal" class="p-8 bg-white rounded shadow-md">
         <div class="mb-4">
-            <label for="title" class="block text-gray-700 font-medium mb-2">Title</label>
-            <input type="text" id="title" name="title" class="w-full border border-gray-300 p-2 rounded" required>
+            <label for="title" class="block mb-2 font-medium text-gray-700">Title</label>
+            <input type="text" id="title" name="title" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
         
         <div class="mb-4">
-            <label for="startat" class="block text-gray-700 font-medium mb-2">Start Date</label>
-            <input type="datetime-local" id="startat" name="startat" class="w-full border border-gray-300 p-2 rounded" required>
+            <label for="startat" class="block mb-2 font-medium text-gray-700">Start Date</label>
+            <input type="datetime-local" id="startat" name="startat" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
         
         <div class="mb-4">
-            <label for="endat" class="block text-gray-700 font-medium mb-2">End Date</label>
-            <input type="datetime-local" id="endat" name="endat" class="w-full border border-gray-300 p-2 rounded" required>
+            <label for="endat" class="block mb-2 font-medium text-gray-700">End Date</label>
+            <input type="datetime-local" id="endat" name="endat" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
 
         <div class="mb-4">
-            <label for="description" class="block text-gray-700 font-medium mb-2">Description</label>
-            <textarea id="description" name="description" class="w-full border border-gray-300 p-2 rounded" rows="4"></textarea>
+            <label for="description" class="block mb-2 font-medium text-gray-700">Description</label>
+            <textarea id="description" name="description" class="w-full p-2 border border-gray-300 rounded" rows="4"></textarea>
         </div>
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit</button>
+        <button type="submit" class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Submit</button>
     </form>
 </div>

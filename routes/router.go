@@ -70,7 +70,7 @@ func SetupRoutes(db *gorm.DB, store sessions.Store) *gin.Engine {
 			accountRoutes.POST("/update", authController.Update)
 			accountRoutes.POST("/logout", authController.LogoutStore)
 		}
-		goalRoutes := authRoutes.Group("goals")
+		goalRoutes := authRoutes.Group("/goals")
 		{
 			goalRoutes.GET("", goalController.Index)
 			goalRoutes.GET("/addNewGoal", goalController.NewGoalSingle)

@@ -29,7 +29,7 @@ func main() {
 	store := cookie.NewStore([]byte(os.Getenv("SECRET")))
 	store.Options(sessions.Options{
 		Path:     "/",
-		MaxAge:   300,
+		MaxAge:   3600,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
