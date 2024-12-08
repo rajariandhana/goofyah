@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"goofyah/models"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +17,19 @@ func NewCategoriesController(db *gorm.DB) *CategoriesController {
 	return &CategoriesController{DB: db}
 }
 
+func (uc *CategoriesController) LogAllCategory() {
+	var categories []models.Categories
+	if err := uc.DB.Find(&categories).Error; err != nil {
+		return
+	}
+	for _, category := range categories {
+		log.Printf("Category: %+v\n", category)
+	}
+}
+
 // Display all categories
 func (uc *CategoriesController) Index(c *gin.Context) {
+	uc.LogAllCategory()
 	var categories []models.Categories
 	if err := uc.DB.Find(&categories).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Categories not found"})

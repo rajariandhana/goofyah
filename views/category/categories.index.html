@@ -1,33 +1,33 @@
 {{ template "header.html" . }}
 
-<h1 class="text-3xl font-bold mb-6">List of Categories</h1>
+<h1 class="mb-6 text-3xl font-bold">List of Categories</h1>
 
 <form method="POST" action="/categories/listcategories" class="p-8 rounded shadow-md">
-    <div class="mb-4 flex items-center">
+    <div class="flex items-center mb-4">
         <input 
             type="text" 
             id="title" 
             name="title" 
             placeholder="Category Title" 
-            class="flex-1 border border-gray-300 p-2 rounded mr-2" 
+            class="flex-1 p-2 mr-2 border border-gray-300 rounded" 
             required>
         <button 
             type="submit" 
-            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 font-bold text-lg">
+            class="px-4 py-2 text-lg font-bold text-white bg-blue-500 rounded hover:bg-blue-600">
             +
         </button>
     </div>
 </form>
 
 
-{{ if .Categories }}
-    {{ range .Categories }}
-        <div class="bg-white rounded-md shadow-md px-40 py-2">
+{{ if .categories }}
+    {{ range .categories }}
+        <div class="px-40 py-2 bg-white rounded-md shadow-md">
             {{ .Title }} <!-- Display the category title -->
         </div>
     {{ end }}
 {{ else }}
-    <div class="bg-white rounded-md shadow-md px-40 py-2">
+    <div class="px-40 py-2 bg-white rounded-md shadow-md">
         No categories created yet.
     </div>
 {{ end }}
