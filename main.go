@@ -22,5 +22,5 @@ func main() {
 	}
 	seeder.SeedUser()
 	router := routes.SetupRoutes(db)
-	router.Run(":8080")
+	router.Run("localhost:8080")
 }
