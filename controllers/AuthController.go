@@ -6,10 +6,12 @@ import (
 	"goofyah/models"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
+	"time"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -104,9 +106,10 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 
 	err_email := ""
 	err_password := ""
+	err_fail := ""
 
 	err_email = ac.EmailValid(input.Email)
-	log.Print(err_email)
+	// log.Print(err_email)
 	var user models.User
 	if err_email == "" {
 		existingUser, err := ac.GetUserByEmail(input.Email)
@@ -124,7 +127,7 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 	}
 
 	if err_email == "" && err_password == "" {
-		log.Println("user found " + user.Email)
+		// log.Println("user found " + user.Email)
 		// Hashed(user.Password, input.Password)
 		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 		if err != nil {
@@ -134,11 +137,17 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 	}
 
 	if err_email == "" && err_password == "" {
-		session := sessions.Default(c)
-		log.Println("user.ID ", user.ID)
-		session.Set("userID", user.ID)
-		// log.Println("session.Get(userID) ", session.Get("userID"))
-		session.Save()
+		tokenString, err := createAndSignJWT(&user)
+		if err != nil {
+			err_fail = "Failed to log in"
+			c.HTML(http.StatusBadRequest, "login.html", gin.H{
+				"title":    "Login",
+				"err_fail": err_fail,
+			})
+		}
+		// log.Println("error nil")
+		setCookie(c, tokenString)
+		// log.Println("cookie set redirecting to /")
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -147,8 +156,22 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 		"title":        "Login",
 		"err_email":    err_email,
 		"err_password": err_password,
+		"err_fail":     err_fail,
 	})
 
+}
+
+func createAndSignJWT(user *models.User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": user.ID,
+		"ttl":    time.Now().Add(time.Hour * 24 * 100).Unix(),
+	})
+	return token.SignedString([]byte(os.Getenv("secret")))
+}
+
+func setCookie(c *gin.Context, token string) {
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Auth", token, 3600*24*100, "", "", false, true)
 }
 
 // func Hashed(pass1 string, pass2 string) {
@@ -162,12 +185,7 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 
 func (ac *AuthController) LogoutStore(c *gin.Context) {
 	log.Println("LogoutStore")
-	session := sessions.Default(c)
-	// log.Println("userid ", session.Get("userID"))
-	session.Clear()
-	// log.Println("userid ", session.Get("userID"))
-	session.Save()
-	// log.Println("userid ", session.Get("userID"))
+	c.SetCookie("Auth", "deleted", 0, "", "", false, true)
 	c.Redirect(http.StatusFound, "/login")
 }
 
@@ -205,17 +223,11 @@ func (ac *AuthController) GetUserByID(id uint) (*models.User, error) {
 }
 
 func (ac *AuthController) Show(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("userID")
-	if userID == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-	user, err := ac.GetUserByID(userID.(uint))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
+	// log.Println("show")
+
+	user, _ := c.Get("user")
+
+	// log.Println("showing user ", user)
 	c.HTML(http.StatusOK, "user.show.html", gin.H{
 		"title": "Account",
 		"user":  user,
@@ -234,12 +246,8 @@ func (ac *AuthController) Update(c *gin.Context) {
 	err_password := ""
 	err_updating := ""
 
-	session := sessions.Default(c)
-	userID := session.Get("userID")
-	user, err := ac.GetUserByID(userID.(uint))
-	if err != nil {
-		err_updating = "Failed to update user"
-	}
+	value, _ := c.Get("user")
+	user := value.(*models.User)
 
 	if input.Name == "" {
 		err_name = "Invalid name"

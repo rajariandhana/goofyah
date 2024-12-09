@@ -1,6 +1,9 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -14,4 +17,15 @@ type User struct {
 
 func MigrateUser(db *gorm.DB) {
 	db.AutoMigrate(&User{})
+}
+
+func GetUserByID(id uint) (*User, error) {
+	var user User
+	if err := DB.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user with ID %d not found", id)
+		}
+		return nil, err
+	}
+	return &user, nil
 }

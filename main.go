@@ -3,14 +3,11 @@ package main
 import (
 	"goofyah/config"
 	"goofyah/database"
+	"goofyah/models"
 	"goofyah/routes"
 	"goofyah/seeder"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/joho/godotenv"
 )
 
@@ -22,18 +19,19 @@ func main() {
 	}
 	config.LoadConfig()
 	db, err := database.Setup()
+	models.ConnectDB(db)
 	if err != nil {
 		log.Println("Error:", err)
 		return
 	}
-	store := cookie.NewStore([]byte(os.Getenv("SECRET")))
-	store.Options(sessions.Options{
-		Path:     "/",
-		MaxAge:   3600,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
+	// store := cookie.NewStore([]byte(os.Getenv("SECRET")))
+	// store.Options(sessions.Options{
+	// 	Path:     "/",
+	// 	MaxAge:   3600,
+	// 	HttpOnly: true,
+	// 	SameSite: http.SameSiteLaxMode,
+	// })
 	seeder.SeedUser(db)
-	router := routes.SetupRoutes(db, store)
+	router := routes.SetupRoutes(db)
 	router.Run(":8080")
 }

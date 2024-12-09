@@ -10,9 +10,9 @@ import (
 
 func SeedUser(db *gorm.DB) {
 	users := []models.User{
-		{Name: "Harry Potter", Email: "harry@gmail.com", Password: "password"},
-		{Name: "Hermione Granger", Email: "hermione@gmail.com", Password: "password"},
-		{Name: "Ron Weasley", Email: "ron@gmail.com", Password: "password"},
+		{Name: "Harry Potter", Email: "harry@gmail.com", Password: "p"},
+		{Name: "Hermione Granger", Email: "hermione@gmail.com", Password: "p"},
+		{Name: "Ron Weasley", Email: "ron@gmail.com", Password: "p"},
 	}
 	for _, user := range users {
 		var existingUser models.User
