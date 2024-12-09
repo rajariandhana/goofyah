@@ -8,7 +8,3 @@ type Categories struct {
 	gorm.Model
 	Title string `gorm:"size:64" json:"title" form:"title" binding:"required"`
 }
-
-func MigrateCategories(db *gorm.DB) {
-	db.AutoMigrate(&Categories{})
-}

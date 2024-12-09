@@ -14,8 +14,3 @@ type Goal struct {
 	EndAt       time.Time `json:"endat" form:"endat" binding:"required"`
 	Description string    `gorm:"size:512" json:"description" form:"description"`
 }
-
-// jangan lupa panggil MigrateGoal di connection.go
-func MigrateGoal(db *gorm.DB) {
-	db.AutoMigrate(&Goal{})
-}

@@ -34,7 +34,7 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 
 	router.Static("/public", "./public")
 	router.LoadHTMLFiles(htmlFiles...)
-	authController := controllers.NewAuthController(db)
+	authController := controllers.NewAuthController()
 	goalController := controllers.NewGoalController(db)
 	categoriesController := controllers.NewCategoriesController(db)
 
