@@ -6,15 +6,9 @@ import (
 	"goofyah/routes"
 	"goofyah/seeder"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/joho/godotenv"
 )
-
-// var store sessions.Store
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -26,14 +20,7 @@ func main() {
 		log.Println("Error:", err)
 		return
 	}
-	store := cookie.NewStore([]byte(os.Getenv("SECRET")))
-	store.Options(sessions.Options{
-		Path:     "/",
-		MaxAge:   3600,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
-	seeder.SeedUser(db)
-	router := routes.SetupRoutes(db, store)
+	seeder.SeedUser()
+	router := routes.SetupRoutes(db)
 	router.Run(":8080")
 }

@@ -1,6 +1,6 @@
 {{ template "header.html" . }}
 
-<form method="POST" action="/account/update" class="flex flex-col p-4 pb-0 w-96">
+<form method="POST" action="/user/update" class="flex flex-col p-4 pb-0 w-96">
     <div class="mb-2">
         <label for="name" class="block text-sm font-medium">Name</label>
         <input type="text" name="name" value="{{ .user.Name }}" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500" >
@@ -27,7 +27,7 @@
     {{ end }}
     <button type="submit" class="bg-sky-500 px-4 py-2 rounded-md shadow-md text-white font-medium w-full mt-2">Update Information</button>
 </form>
-<form method="POST" action="/account/logout" class="flex w-96 px-4 items-start justify-center">
+<form method="POST" action="/user/logout" class="flex w-96 px-4 items-start justify-center">
     <button type="submit" class="border-[1px] border-sky-500 text-sky-500 px-4 py-2 rounded-md shadow-md bg-sky-100 font-medium w-full">Logout</button>
 </form>
 

@@ -1,6 +1,10 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+	"log"
+
 	"gorm.io/gorm"
 )
 
@@ -12,6 +16,50 @@ type User struct {
 	Password string `gorm:"size:255" json:"password" form:"password" binding:"required"`
 }
 
-func MigrateUser(db *gorm.DB) {
-	db.AutoMigrate(&User{})
+func GetUserByID(id uint) (*User, error) {
+	var user User
+	if err := DB.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user with ID %d not found", id)
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	if err := DB.Where("email = ?", email).First(&user).Error; err != nil {
+		// log.Println("email not exist")
+		return nil, err
+	}
+	return &user, nil
+}
+
+func GetAllUser() []User {
+	var users []User
+	if err := DB.Find(&users).Error; err != nil {
+		log.Printf("Error fetching users: %v", err)
+		return []User{}
+	}
+	// log.Println("success get all")
+	return users
+}
+
+func ShowAllUser() {
+	var users []User
+	if err := DB.Find(&users).Error; err != nil {
+		return
+	}
+	for _, user := range users {
+		log.Println(user)
+	}
+}
+
+func StoreUser(user User) error {
+	return DB.Create(&user).Error
+}
+
+func SaveUser(user User) error {
+	return DB.Save(&user).Error
 }

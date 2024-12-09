@@ -13,6 +13,7 @@ var DB *gorm.DB
 func Setup() (*gorm.DB, error) {
 	var err error
 	DB, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	models.ConnectDB(DB)
 	if err != nil {
 		panic("Failed to connect" + err.Error())
 	}
