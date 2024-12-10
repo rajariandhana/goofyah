@@ -150,7 +150,7 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 			})
 			return
 		}
-		log.Println("tokenString ", tokenString)
+		// log.Println("tokenString ", tokenString)
 		// log.Println("error nil")
 		setCookie(c, tokenString)
 		// log.Println("cookie set redirecting to /")
