@@ -1,0 +1,21 @@
+{{ template "header.html" . }}
+
+<h1 class="mb-6 text-3xl font-bold">Goals for {{ .category.Title }}</h1>
+
+{{ if .goals }}
+    <ul class="space-y-4">
+        {{ range .goals }}
+        <li class="p-4 bg-white rounded shadow-md">
+            <h2 class="text-lg font-bold">{{ .Title }}</h2>
+            <p class="text-gray-700">{{ .Description }}</p>
+            <p class="text-sm text-gray-500">
+                Start: {{ .StartAt.Format "Jan 2, 2006 3:04 PM" }} <br>
+                End: {{ .EndAt.Format "Jan 2, 2006 3:04 PM" }}
+            </p>
+        </li>
+        {{ end }}
+    </ul>
+{{ else }}
+    <p class="text-gray-500">No goals found for this category.</p>
+{{ end }}
+<a href="/categories/listcategories" class="mt-4 inline-block text-blue-600 hover:underline">← Back to Categories</a>

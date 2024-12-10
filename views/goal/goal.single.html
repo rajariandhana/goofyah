@@ -8,7 +8,7 @@
             <input type="text" id="title" name="title" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
         
-        <div class="mb-4">
+      <!---  <div class="mb-4">
             <label for="startat" class="block mb-2 font-medium text-gray-700">Start Date</label>
             <input type="datetime-local" id="startat" name="startat" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
@@ -16,6 +16,19 @@
         <div class="mb-4">
             <label for="endat" class="block mb-2 font-medium text-gray-700">End Date</label>
             <input type="datetime-local" id="endat" name="endat" class="w-full p-2 border border-gray-300 rounded" required>
+        </div>
+    -->
+        <div class="mb-4">
+            <label for="category" class="block mb-2 font-medium text-gray-700">Category</label>
+            <div class="flex items-center gap-2">
+                <select id="category" name="category" class="w-full p-2 border border-gray-300 rounded" required>
+                    <option value="">Select a category</option>
+                    {{ range .categories }}
+                        <option value="{{ .Title }}">{{ .Title }}</option>
+                    {{ end }}
+                </select>
+                <button type="button" id="add-category-btn" class="p-2 text-white bg-blue-500 rounded hover:bg-blue-600">+</button>
+            </div>
         </div>
 
         <div class="mb-4">
@@ -26,3 +39,45 @@
         <button type="submit" class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Submit</button>
     </form>
 </div>
+
+<!-- modal bang to add new cat kl gaada pilihan / nambah baru -->
+<div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="p-6 bg-white rounded shadow-lg">
+        <h2 class="mb-4 text-lg font-bold">Add New Category</h2>
+        <form id="category-form">
+            <div class="mb-4">
+                <label for="new-category" class="block mb-2 font-medium text-gray-700">Category Name</label>
+                <input type="text" id="new-category" name="new-category" class="w-full p-2 border border-gray-300 rounded" required>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancel-category-btn" class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                <button type="submit" class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+//modal thingy
+    document.getElementById('add-category-btn').addEventListener('click', function() {
+        document.getElementById('category-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('cancel-category-btn').addEventListener('click', function() {
+        document.getElementById('category-modal').classList.add('hidden');
+    });
+
+    document.getElementById('category-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const newCategory = document.getElementById('new-category').value;
+
+        const categoryDropdown = document.getElementById('category');
+        const newOption = document.createElement('option');
+        newOption.value = newCategory;
+        newOption.textContent = newCategory;
+        categoryDropdown.appendChild(newOption);
+
+        document.getElementById('new-category').value = '';
+        document.getElementById('category-modal').classList.add('hidden');
+    });
+</script>

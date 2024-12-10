@@ -19,11 +19,14 @@
     </div>
 </form>
 
-
 {{ if .categories }}
     {{ range .categories }}
         <div class="px-40 py-2 bg-white rounded-md shadow-md">
-            {{ .Title }} <!-- Display the category title -->
+            <a 
+                href="/categories/{{ .Title }}"
+                class="text-blue-600 hover:underline">
+                {{ .Title }} 
+            </a>
         </div>
     {{ end }}
 {{ else }}

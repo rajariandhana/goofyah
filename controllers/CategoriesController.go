@@ -27,7 +27,6 @@ func (uc *CategoriesController) LogAllCategory() {
 	}
 }
 
-// Display all categories
 func (uc *CategoriesController) Index(c *gin.Context) {
 	uc.LogAllCategory()
 	var categories []models.Categories
@@ -42,7 +41,6 @@ func (uc *CategoriesController) Index(c *gin.Context) {
 	})
 }
 
-// Handle category creation
 func (uc *CategoriesController) CreateCategory(c *gin.Context) {
 	var category models.Categories
 	if err := c.ShouldBind(&category); err != nil {
@@ -50,12 +48,33 @@ func (uc *CategoriesController) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	// Save the category to the database
 	if err := uc.DB.Create(&category).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save category"})
 		return
 	}
 
-	// Redirect to the categories page to display the updated list
 	c.Redirect(http.StatusSeeOther, "/categories/listcategories")
+}
+
+func (uc *CategoriesController) ShowCategoryGoals(c *gin.Context) {
+
+	categoryTitle := c.Param("category")
+
+	var category models.Categories
+	if err := uc.DB.Where("title = ?", categoryTitle).First(&category).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+		return
+	}
+
+	var goals []models.Goal
+	if err := uc.DB.Where("category = ?", categoryTitle).Find(&goals).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Goals for this category not found"})
+		return
+	}
+
+	c.HTML(http.StatusOK, "single.category.html", gin.H{
+		"title":    category.Title + " Goals",
+		"category": category,
+		"goals":    goals,
+	})
 }
