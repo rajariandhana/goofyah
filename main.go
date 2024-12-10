@@ -14,6 +14,9 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	// log.Println("SECRET|", os.Getenv("SECRET"), "|")
+	// secret := strings.TrimSpace(os.Getenv("SECRET"))
+	// log.Println("SECRET|", secret, "|")
 	config.LoadConfig()
 	db, err := database.Setup()
 	if err != nil {
@@ -22,5 +25,5 @@ func main() {
 	}
 	seeder.SeedUser()
 	router := routes.SetupRoutes(db)
-	router.Run("localhost:8080")
+	router.Run(":8080")
 }

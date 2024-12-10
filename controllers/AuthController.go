@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -147,7 +148,9 @@ func (ac *AuthController) LoginStore(c *gin.Context) {
 				"title":    "Login",
 				"err_fail": err_fail,
 			})
+			return
 		}
+		log.Println("tokenString ", tokenString)
 		// log.Println("error nil")
 		setCookie(c, tokenString)
 		// log.Println("cookie set redirecting to /")
@@ -169,7 +172,9 @@ func createAndSignJWT(user *models.User) (string, error) {
 		"userID": user.ID,
 		"ttl":    time.Now().Add(time.Hour * 24 * 100).Unix(),
 	})
-	return token.SignedString([]byte(os.Getenv("secret")))
+	// log.Println("secret ", []byte(os.Getenv("SECRET")))
+	secret := strings.TrimSpace(os.Getenv("SECRET"))
+	return token.SignedString([]byte(secret))
 }
 
 func setCookie(c *gin.Context, token string) {
