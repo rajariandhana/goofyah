@@ -6,13 +6,11 @@
 
     {{ if .goals }}
         {{ range .goals }}
-        <div class="mb-5 flex items-center bg-sky-50 p-3 rounded-lg shadow-md">
-            <span class="flex-1 bg-white border border-gray-300 text-gray-900 rounded-lg p-4 focus:ring-sky-500 focus:border-sky-500">
-                <strong class="block text-sm font-semibold">Goal:</strong> 
-                <span class="block text-lg">{{ .Title }}</span>
-                <strong class="block text-sm font-semibold mt-2">Category:</strong>
-                <span class="block text-md text-gray-700">{{ .Categories.Title }}</span>
-            </span>
+        <div class="mb-5 flex justify-between items-center bg-white p-3 rounded-lg shadow-md w-96">
+            <div class="flex gap-x-2 items-center">
+                <span class="text-lg font-semibold">{{ .Title }}</span>
+                <a href="/categories/{{ .CategoriesID }}" class="bg-orange-200 px-2 py-1 rounded-md w-fit text-sm">{{ .Categories.Title }}</a>
+            </div>
         
             <form method="POST" action="/goals/delete/{{ .ID }}" class="ml-4">
                 <button 
@@ -26,7 +24,7 @@
         {{ end }}
     {{ else }}
         <div class="mb-4 flex items-center bg-gray-50 p-4 rounded-lg shadow-md">
-            No goals for today.
+            You have no goals yet...
         </div>
     {{ end }}
 </div>

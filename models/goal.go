@@ -33,6 +33,12 @@ func GetGoalsOfUser(user User) []Goal {
 	return goals
 }
 
+func GetGoalByID(ID uint) Goal {
+	var goal Goal
+	DB.First(&goal, ID)
+	return goal
+}
+
 func StoreGoal(goal Goal) error {
 	return DB.Create(&goal).Error
 }

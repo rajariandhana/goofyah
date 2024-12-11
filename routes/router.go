@@ -56,6 +56,7 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	goalRoutes := router.Group("/goals")
 	{
 		goalRoutes.GET("/addNewGoal", goalController.NewGoalSingle)
+		goalRoutes.GET("/:ID", goalController.ShowGoal)
 		goalRoutes.POST("/addNewGoal", goalController.AddNewGoal)
 		goalRoutes.POST("/delete/:ID", goalController.DeleteGoal)
 

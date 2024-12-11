@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"goofyah/models"
+	"log"
 
 	//"log"
 	"net/http"
@@ -44,6 +45,25 @@ func (gc *GoalController) ShowAllGoal() {
 	//for _, goal := range goals {
 	//log.Println(goal)
 	//	}
+}
+
+func (uc *GoalController) ShowGoal(c *gin.Context) {
+	goalIDStr := c.Param("ID")
+	log.Println("goalIDStr", goalIDStr)
+
+	goalID, err := strconv.ParseUint(goalIDStr, 10, 64)
+	if err != nil {
+		c.HTML(http.StatusNotFound, "error.html", gin.H{"message": "err"})
+		return
+	}
+	log.Println("goalID", goalID)
+
+	goal := models.GetGoalByID(uint(goalID))
+	log.Println(goal)
+	c.HTML(http.StatusOK, "goal.show.html", gin.H{
+		"title": "Show Goal",
+		"goal":  goal,
+	})
 }
 
 func (gc *GoalController) NewGoalSingle(c *gin.Context) {
