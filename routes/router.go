@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"goofyah/controllers"
 	"goofyah/middleware"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -44,13 +43,9 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	router.GET("/register", middleware.UnauthMiddleware(), authController.RegisterCreate)
 	router.POST("/register", middleware.UnauthMiddleware(), authController.RegisterStore)
 
-	// router.Use(middleware.AuthMiddleware())
+	router.Use(middleware.AuthMiddleware())
 	// all routes below will use AuthMiddleware
-	router.GET("/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "Home",
-		})
-	})
+	router.GET("/", goalController.Index)
 
 	userRoutes := router.Group("/user")
 	{
@@ -60,15 +55,17 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	}
 	goalRoutes := router.Group("/goals")
 	{
-		goalRoutes.GET("/", goalController.Index)
 		goalRoutes.GET("/addNewGoal", goalController.NewGoalSingle)
 		goalRoutes.POST("/addNewGoal", goalController.AddNewGoal)
+		goalRoutes.POST("/delete/:ID", goalController.DeleteGoal)
+
 	}
 	categoriesRoutes := router.Group("/categories")
 	{
 		categoriesRoutes.GET("/listcategories", categoriesController.Index)           // GET request to fetch and display categories at /categories/listcategories
 		categoriesRoutes.POST("/listcategories", categoriesController.CreateCategory) // POST request to create a new category at /categories/listcategories
-		categoriesRoutes.GET("/categories/:category", categoriesController.ShowCategoryGoals)
+		categoriesRoutes.GET("/:ID", categoriesController.ShowCategoryGoals)
+		categoriesRoutes.POST("/delete/:ID", categoriesController.DeleteCategories)
 	}
 	// }
 

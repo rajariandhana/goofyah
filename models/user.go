@@ -10,10 +10,11 @@ import (
 
 type User struct {
 	gorm.Model
-	// ID       uint   `gorm:"primaryKey" json:"id"`
-	Name     string `gorm:"size:64" json:"name" form:"name" binding:"required"`
-	Email    string `gorm:"size:64,index" json:"email" form:"email" binding:"required,email"`
-	Password string `gorm:"size:255" json:"password" form:"password" binding:"required"`
+	// ID         uint         `gorm:"primaryKey" json:"id"`
+	Name       string       `gorm:"size:64" json:"name" form:"name" binding:"required"`
+	Email      string       `gorm:"size:64,index" json:"email" form:"email" binding:"required,email"`
+	Password   string       `gorm:"size:255" json:"password" form:"password" binding:"required"`
+	Categories []Categories `gorm:"foreignKey:UserID"`
 }
 
 func GetUserByID(id uint) (*User, error) {
@@ -52,7 +53,8 @@ func ShowAllUser() {
 		return
 	}
 	for _, user := range users {
-		log.Println(user)
+		// log.Println(user)
+		log.Println("user", user.ID, user.Name, user.Email)
 	}
 }
 

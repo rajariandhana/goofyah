@@ -8,7 +8,7 @@
             <input type="text" id="title" name="title" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
         
-      <!---  <div class="mb-4">
+      <!-- -  <div class="mb-4">
             <label for="startat" class="block mb-2 font-medium text-gray-700">Start Date</label>
             <input type="datetime-local" id="startat" name="startat" class="w-full p-2 border border-gray-300 rounded" required>
         </div>
@@ -24,10 +24,11 @@
                 <select id="category" name="category" class="w-full p-2 border border-gray-300 rounded" required>
                     <option value="">Select a category</option>
                     {{ range .categories }}
-                        <option value="{{ .Title }}">{{ .Title }}</option>
+                        <option value="{{ .ID }}">{{ .Title }}</option>
                     {{ end }}
                 </select>
-                <button type="button" id="add-category-btn" class="p-2 text-white bg-blue-500 rounded hover:bg-blue-600">+</button>
+                <!-- <button type="button" id="add-category-btn" class="p-2 text-white bg-blue-500 rounded hover:bg-blue-600">+</button> -->
+                <a href="/categories/listcategories" class="p-2 text-white bg-blue-500 rounded hover:bg-blue-600">+</a>
             </div>
         </div>
 
@@ -41,7 +42,7 @@
 </div>
 
 <!-- modal bang to add new cat kl gaada pilihan / nambah baru -->
-<div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900 bg-opacity-50">
+<!-- <div id="category-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
     <div class="p-6 bg-white rounded shadow-lg">
         <h2 class="mb-4 text-lg font-bold">Add New Category</h2>
         <form id="category-form">
@@ -55,9 +56,9 @@
             </div>
         </form>
     </div>
-</div>
+</div> -->
 
-<script>
+<!-- <script>
 //modal thingy
     document.getElementById('add-category-btn').addEventListener('click', function() {
         document.getElementById('category-modal').classList.remove('hidden');
@@ -80,4 +81,4 @@
         document.getElementById('new-category').value = '';
         document.getElementById('category-modal').classList.add('hidden');
     });
-</script>
+</script> -->
