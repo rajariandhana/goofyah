@@ -55,15 +55,17 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	}
 	goalRoutes := router.Group("/goals")
 	{
-		goalRoutes.GET("/", goalController.Index)
 		goalRoutes.GET("/addNewGoal", goalController.NewGoalSingle)
 		goalRoutes.POST("/addNewGoal", goalController.AddNewGoal)
+		goalRoutes.POST("/delete/:ID", goalController.DeleteGoal)
+
 	}
 	categoriesRoutes := router.Group("/categories")
 	{
 		categoriesRoutes.GET("/listcategories", categoriesController.Index)           // GET request to fetch and display categories at /categories/listcategories
 		categoriesRoutes.POST("/listcategories", categoriesController.CreateCategory) // POST request to create a new category at /categories/listcategories
-		categoriesRoutes.GET("/categories/:category", categoriesController.ShowCategoryGoals)
+		categoriesRoutes.GET("/:ID", categoriesController.ShowCategoryGoals)
+		categoriesRoutes.POST("/delete/:ID", categoriesController.DeleteCategories)
 	}
 	// }
 

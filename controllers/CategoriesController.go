@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"goofyah/models"
-	"log"
+	//"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -22,10 +23,10 @@ func (uc *CategoriesController) LogAllCategory() {
 	if err := uc.DB.Find(&categories).Error; err != nil {
 		return
 	}
-	for _, category := range categories {
-		// log.Printf("Category: %+v\n", category)
-		log.Println("Category:", category.ID, category.Title, "user:", category.User.ID, category.User.Name)
-	}
+	//for _, category := range categories {
+	// log.Printf("Category: %+v\n", category)
+	//log.Println("Category:", category.ID, category.Title, "user:", category.User.ID, category.User.Name)
+	//}
 }
 
 func (uc *CategoriesController) Index(c *gin.Context) {
@@ -69,24 +70,52 @@ func (uc *CategoriesController) CreateCategory(c *gin.Context) {
 }
 
 func (uc *CategoriesController) ShowCategoryGoals(c *gin.Context) {
+	// categoryID := c.Param("ID")
+	//log.Println("tes")
+	categoryIDStr := c.Param("ID")
+	//log.Println(categoryIDStr)
 
-	categoryTitle := c.Param("category")
-
-	var category models.Categories
-	if err := uc.DB.Where("title = ?", categoryTitle).First(&category).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+	categoryID, err := strconv.ParseUint(categoryIDStr, 10, 64)
+	//log.Println(categoryID)
+	category, err := models.GetCategoryByID(uint(categoryID))
+	if err != nil {
+		c.HTML(http.StatusNotFound, "error.html", gin.H{"message": "Category not found"})
 		return
 	}
 
-	var goals []models.Goal
-	if err := uc.DB.Where("category = ?", categoryTitle).Find(&goals).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Goals for this category not found"})
-		return
-	}
+	goals := models.GetGoalsOfCategory(uint(categoryID))
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch goals for category"})
+	// 	return
+	// }
+	// log.Println(category.Goals)
 
 	c.HTML(http.StatusOK, "single.category.html", gin.H{
 		"title":    category.Title + " Goals",
 		"category": category,
 		"goals":    goals,
 	})
+}
+
+func (gc *CategoriesController) DeleteCategories(c *gin.Context) {
+	CategoryID := c.Param("ID")
+	id, err := strconv.ParseUint(CategoryID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
+		return
+	}
+	var category models.Categories
+	if err := gc.DB.Where("id = ?", uint(id)).First(&category).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+		return
+	}
+	if err := gc.DB.Where("categories_id = ?", uint(id)).Delete(&models.Goal{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete goals"})
+		return
+	}
+	if err := gc.DB.Delete(&models.Categories{}, uint(id)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete category"})
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "/categories/listcategories")
 }

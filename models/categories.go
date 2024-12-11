@@ -20,3 +20,17 @@ func GetCategoriesOfUser(user User) []Categories {
 func StoreCategories(categories Categories) error {
 	return DB.Create(&categories).Error
 }
+
+func GetCategoryByID(ID uint) (*Categories, error) {
+	var category Categories
+	if err := DB.First(&category, ID).Error; err != nil {
+		return nil, err
+	}
+	return &category, nil
+}
+
+func GetGoalsOfCategory(ID uint) []Goal {
+	var goals []Goal
+	DB.Preload("Goals").First(&goals, ID)
+	return goals
+}

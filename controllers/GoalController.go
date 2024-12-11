@@ -3,8 +3,10 @@ package controllers
 import (
 	"fmt"
 	"goofyah/models"
-	"log"
+
+	//"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -39,9 +41,9 @@ func (gc *GoalController) ShowAllGoal() {
 	if err := gc.DB.Find(&goals).Error; err != nil {
 		return
 	}
-	for _, goal := range goals {
-		log.Println(goal)
-	}
+	//for _, goal := range goals {
+	//log.Println(goal)
+	//	}
 }
 
 func (gc *GoalController) NewGoalSingle(c *gin.Context) {
@@ -98,6 +100,36 @@ func (gc *GoalController) AddNewGoal(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Goal successfully created: %+v\n", goal)
+	//log.Printf("Goal successfully created: %+v\n", goal)
+	c.Redirect(http.StatusSeeOther, "/")
+}
+
+func (gc *GoalController) DeleteGoal(c *gin.Context) {
+	goalID := c.Param("ID")
+	id, err := strconv.ParseUint(goalID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid goal ID"})
+		return
+	}
+	gc.DB.Delete(&models.Goal{}, uint(id))
+
+	// var goal models.Goal
+	// if err := gc.DB.First(&goal, uint(id)).Error; err != nil {
+	// 	c.JSON(http.StatusNotFound, gin.H{"error": "Goal not found"})
+	// 	return
+	// }
+
+	// if err := gc.DB.Delete(&goal).Error; err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete goal"})
+	// 	return
+	// }
+
+	// Remove the goal from the category
+	// if err := gc.DB.Model(&models.Categories{}).Where("title = ?", goal.Categories).Update("goals_count", gorm.Expr("goals_count - 1")).Error; err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update category"})
+	// 	return
+	// }
+
+	// Redirect back to the goals list
 	c.Redirect(http.StatusSeeOther, "/")
 }

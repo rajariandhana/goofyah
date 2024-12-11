@@ -32,6 +32,7 @@ func GetGoalsOfUser(user User) []Goal {
 	}
 	return goals
 }
+
 func StoreGoal(goal Goal) error {
 	return DB.Create(&goal).Error
 }
