@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+
 	"gorm.io/gorm"
 )
 
@@ -31,6 +33,7 @@ func GetCategoryByID(ID uint) (*Categories, error) {
 
 func GetGoalsOfCategory(ID uint) []Goal {
 	var goals []Goal
-	DB.Preload("Goals").First(&goals, ID)
+	DB.Preload("Categories").Where("categories_id= ?", ID).Find(&goals)
+	log.Println(goals)
 	return goals
 }
