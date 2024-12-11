@@ -1,8 +1,10 @@
 {{ template "header.html" . }}
 
-<div class="max-w-6xl mx-auto mt-10">
-    <h1 class="mb-6 text-3xl font-bold">Add New Goal</h1>
-    <form method="POST" action="/goals/addNewGoal" class="p-8 bg-white rounded shadow-md">
+<div class="max-w-6xl mx-auto mt-12">
+    <div class="text-center">
+        <h1 class="mb-8 text-4xl font-bold text-gray-800">Add New Goal</h1>
+    </div>
+    <form method="POST" action="/goals/addNewGoal" class="p-10 bg-white rounded shadow-md">
         <div class="mb-4">
             <label for="title" class="block mb-2 font-medium text-gray-700">Title</label>
             <input type="text" id="title" name="title" class="w-full p-2 border border-gray-300 rounded" required>
