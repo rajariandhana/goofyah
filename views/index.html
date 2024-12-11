@@ -1,32 +1,36 @@
 {{ template "header.html" . }}
 <div class="flex flex-col p-4 pb-0 w-96">
     <h1 class="text-3xl text-left font-semibold mb-2">
-        Today's Goal
+        List of Goals
     </h1>
 
     {{ if .goals }}
         {{ range .goals }}
-        <div class="mb-2 flex items-center">
-            <span class="bg-white border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 focus:ring-sky-500 focus:border-sky-500">
-                goal: {{ .Title }} <br>
-                category: {{ .Categories.Title }}
+        <div class="mb-5 flex items-center bg-sky-50 p-3 rounded-lg shadow-md">
+            <span class="flex-1 bg-white border border-gray-300 text-gray-900 rounded-lg p-4 focus:ring-sky-500 focus:border-sky-500">
+                <strong class="block text-sm font-semibold">Goal:</strong> 
+                <span class="block text-lg">{{ .Title }}</span>
+                <strong class="block text-sm font-semibold mt-2">Category:</strong>
+                <span class="block text-md text-gray-700">{{ .Categories.Title }}</span>
             </span>
-            <form method="POST" action="/goals/delete/{{ .ID }}" class="ml-2">
+        
+            <form method="POST" action="/goals/delete/{{ .ID }}" class="ml-4">
                 <button 
                     type="submit" 
-                    class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">
+                    class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors duration-300">
                     Delete
                 </button>
             </form>
         </div>
+        
         {{ end }}
     {{ else }}
-        <div class="bg-white rounded-md shadow-md px-40 py-2">
+        <div class="mb-4 flex items-center bg-gray-50 p-4 rounded-lg shadow-md">
             No goals for today.
         </div>
     {{ end }}
 </div>
-<div class="fixed bottom-20 z-10 flex items-center justify-center w-full py-4">
+<div class="fixed bottom-28 z-10 flex items-center justify-center w-full py-4">
     <a href="goals/addNewGoal" class="bg-sky-500 text-center px-4 py-2 rounded-md shadow-md text-white font-medium w-96 mt-2">
         Add Goal
     </a>

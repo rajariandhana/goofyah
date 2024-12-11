@@ -47,7 +47,7 @@ func (gc *GoalController) ShowAllGoal() {
 }
 
 func (gc *GoalController) NewGoalSingle(c *gin.Context) {
-	fmt.Println("Rendering the new goal form...")
+	//fmt.Println("Rendering the new goal form...")
 	value, _ := c.Get("user")
 	user := value.(*models.User)
 	gc.DB.Preload("Categories").First(&user, user.ID)
@@ -66,7 +66,7 @@ type GoalForm struct {
 }
 
 func (gc *GoalController) AddNewGoal(c *gin.Context) {
-	fmt.Println("AddNewGoal endpoint hit...") // Debug: Log endpoint hit
+	//fmt.Println("AddNewGoal endpoint hit...") // Debug: Log endpoint hit
 	var form GoalForm
 	var goal models.Goal
 	if err := c.ShouldBind(&form); err != nil {
