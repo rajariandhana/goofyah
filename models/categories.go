@@ -11,3 +11,12 @@ type Categories struct {
 	User   User   `gorm:"constraint:OnDelete:CASCADE;"`
 	Goals  []Goal `gorm:"foreignKey:CategoriesID"`
 }
+
+func GetCategoriesOfUser(user User) []Categories {
+	DB.Preload("Categories").First(&user, user.ID)
+	return user.Categories
+}
+
+func StoreCategories(categories Categories) error {
+	return DB.Create(&categories).Error
+}

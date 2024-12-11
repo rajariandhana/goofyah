@@ -34,11 +34,10 @@ func (uc *CategoriesController) Index(c *gin.Context) {
 
 	value, _ := c.Get("user")
 	user := value.(*models.User)
-	// uc.DB.Preload("Categories").Where("user_id = ?", user.ID).First(&user)
-	uc.DB.Preload("Categories").First(&user, user.ID)
+	categories := models.GetCategoriesOfUser(*user)
 	c.HTML(http.StatusOK, "categories.index.html", gin.H{
 		"title":      "List of Categories",
-		"categories": user.Categories,
+		"categories": categories,
 	})
 }
 
@@ -59,10 +58,10 @@ func (uc *CategoriesController) CreateCategory(c *gin.Context) {
 	category.Title = form.Title
 	category.UserID = user.ID
 	category.User = *user
-	log.Println("catuser", category.User.Name)
 
-	if err := uc.DB.Create(&category).Error; err != nil {
+	if err := models.StoreCategories(category); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save category"})
+
 		return
 	}
 

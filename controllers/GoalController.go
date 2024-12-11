@@ -19,19 +19,14 @@ func NewGoalController(db *gorm.DB) *GoalController {
 }
 
 func (gc *GoalController) Index(c *gin.Context) {
-	log.Println("indexgoal")
+	// log.Println("indexgoal")
 	gc.ShowAllGoal()
 
 	value, _ := c.Get("user")
 	user := value.(*models.User)
 
-	var goals []models.Goal
-	gc.DB.Preload("Categories.Goals").First(&user, user.ID)
-	for _, category := range user.Categories {
-		goals = append(goals, category.Goals...)
-	}
-
-	log.Println("Goals fetched:\n", goals)
+	goals := models.GetGoalsOfUser(*user)
+	// log.Println("Goals fetched:\n", goals)
 
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Goal",
@@ -98,12 +93,11 @@ func (gc *GoalController) AddNewGoal(c *gin.Context) {
 	goal.CategoriesID = category.ID
 	goal.Categories = category
 
-	if err := gc.DB.Create(&goal).Error; err != nil {
-		fmt.Printf("Error creating goal: %v\n", err) // Debug: Log goal creation error
+	if err := models.StoreGoal(goal); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create goal"})
 		return
 	}
 
-	fmt.Printf("Goal successfully created: %+v\n", goal) // Debug: Log success
+	log.Printf("Goal successfully created: %+v\n", goal)
 	c.Redirect(http.StatusSeeOther, "/")
 }

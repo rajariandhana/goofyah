@@ -19,3 +19,19 @@ type Goal struct {
 	CategoriesID uint       `gorm:""`
 	Categories   Categories `gorm:"constraint:OnDelete:CASCADE;"`
 }
+
+func GetGoalsOfUser(user User) []Goal {
+	var goals []Goal
+	DB.Preload("Categories.Goals").First(&user, user.ID)
+	for _, category := range user.Categories {
+		for _, goal := range category.Goals {
+			// Associate the category with each goal for display
+			goal.Categories = category
+			goals = append(goals, goal)
+		}
+	}
+	return goals
+}
+func StoreGoal(goal Goal) error {
+	return DB.Create(&goal).Error
+}
