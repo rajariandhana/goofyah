@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"goofyah/controllers"
 	"goofyah/middleware"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -44,13 +43,9 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	router.GET("/register", middleware.UnauthMiddleware(), authController.RegisterCreate)
 	router.POST("/register", middleware.UnauthMiddleware(), authController.RegisterStore)
 
-	// router.Use(middleware.AuthMiddleware())
+	router.Use(middleware.AuthMiddleware())
 	// all routes below will use AuthMiddleware
-	router.GET("/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "Home",
-		})
-	})
+	router.GET("/", goalController.Index)
 
 	userRoutes := router.Group("/user")
 	{

@@ -23,30 +23,43 @@ func (uc *CategoriesController) LogAllCategory() {
 		return
 	}
 	for _, category := range categories {
-		log.Printf("Category: %+v\n", category)
+		// log.Printf("Category: %+v\n", category)
+		log.Println("Category:", category.ID, category.Title, "user:", category.User.ID, category.User.Name)
 	}
 }
 
 func (uc *CategoriesController) Index(c *gin.Context) {
+	models.ShowAllUser()
 	uc.LogAllCategory()
-	var categories []models.Categories
-	if err := uc.DB.Find(&categories).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Categories not found"})
-		return
-	}
 
+	value, _ := c.Get("user")
+	user := value.(*models.User)
+	// uc.DB.Preload("Categories").Where("user_id = ?", user.ID).First(&user)
+	uc.DB.Preload("Categories").First(&user, user.ID)
 	c.HTML(http.StatusOK, "categories.index.html", gin.H{
 		"title":      "List of Categories",
-		"categories": categories,
+		"categories": user.Categories,
 	})
 }
 
+type CategoryForm struct {
+	Title string `form:"title"`
+}
+
 func (uc *CategoriesController) CreateCategory(c *gin.Context) {
-	var category models.Categories
-	if err := c.ShouldBind(&category); err != nil {
+	var form CategoryForm
+	if err := c.ShouldBind(&form); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
+	value, _ := c.Get("user")
+	user := value.(*models.User)
+	// log.Println("uid", user.ID)
+	var category models.Categories
+	category.Title = form.Title
+	category.UserID = user.ID
+	category.User = *user
+	log.Println("catuser", category.User.Name)
 
 	if err := uc.DB.Create(&category).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save category"})
