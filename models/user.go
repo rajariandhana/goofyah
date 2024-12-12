@@ -14,6 +14,7 @@ type User struct {
 	Name       string       `gorm:"size:64" json:"name" form:"name" binding:"required"`
 	Email      string       `gorm:"size:64,index" json:"email" form:"email" binding:"required,email"`
 	Password   string       `gorm:"size:255" json:"password" form:"password" binding:"required"`
+	Address    string       `gorm:"" form:"address"`
 	Categories []Categories `gorm:"foreignKey:UserID"`
 }
 
@@ -54,7 +55,7 @@ func ShowAllUser() {
 	}
 	for _, user := range users {
 		// log.Println(user)
-		log.Println("user", user.ID, user.Name, user.Email)
+		log.Println("user", user.ID, user.Name, user.Email, user.Address)
 	}
 }
 

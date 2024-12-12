@@ -59,7 +59,7 @@ func (uc *GoalController) ShowGoal(c *gin.Context) {
 	log.Println("goalID", goalID)
 
 	goal := models.GetGoalByID(uint(goalID))
-	log.Println(goal)
+	// log.Println(goal)
 	c.HTML(http.StatusOK, "goal.show.html", gin.H{
 		"title": "Show Goal",
 		"goal":  goal,
