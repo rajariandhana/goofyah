@@ -25,6 +25,7 @@ type FormInput struct {
 	Name     string `form:"name"`
 	Email    string `form:"email"`
 	Password string `form:"password"`
+	Address  string `form:"address"`
 }
 
 func (ac *AuthController) RegisterCreate(c *gin.Context) {
@@ -74,6 +75,7 @@ func (ac *AuthController) RegisterStore(c *gin.Context) {
 		user.Name = input.Name
 		user.Email = input.Email
 		user.Password = string(hash)
+		user.Address = input.Address
 		if err := models.StoreUser(user); err == nil {
 			c.Redirect(http.StatusFound, "/login")
 			return
@@ -200,6 +202,7 @@ func (ac *AuthController) LogoutStore(c *gin.Context) {
 func (ac *AuthController) Show(c *gin.Context) {
 	user, _ := c.Get("user")
 	// log.Println("showing user ", user)
+	models.ShowAllUser()
 	c.HTML(http.StatusOK, "user.show.html", gin.H{
 		"title": "Account",
 		"user":  user,

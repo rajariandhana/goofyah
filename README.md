@@ -38,10 +38,12 @@ This project uses Gin Web Framework utilizing GORM and tailwindcss for the front
 | User | Update | /user/update | AuthController | Update |
 | Goal | Create | /goals/addNewGoal | GoalController | NewGoalSingle |
 | Goal | Read | / | GoalController | Index |
+| Goal | Read | /goals/:ID | GoalController | ShowGoal |
 | Goal | Delete | /goals/delete/:ID | GoalController | DeleteGoal |
-| Goal | Create | /categories/listcategories | CategoriesController | CreateCategory |
-| Goal | Read | /categories/listcategories | CategoriesController | Index |
-| Goal | Delete | /goals/delete/:ID | CategoriesController | DeleteCategories |
+| Categories | Create | /categories/listcategories | CategoriesController | CreateCategory |
+| Categories | Read | /categories/listcategories | CategoriesController | Index |
+| Categories | Read | /categories/:ID | CategoriesController | ShowCategoryGoals |
+| Categories | Delete | /categories/delete/:ID | CategoriesController | DeleteCategories |
 
 Note that since a goal belongs to a category, when the category is deleted then all goals belonged to that category is deleted as well. This also applies for when a user is deleted, the whole category of that user is deleted as well.
 
@@ -61,7 +63,10 @@ c.HTML(http.StatusOK, htmlFileName, gin.H{
 ```
 
 ## JWT for Authentication and Session
-To ensure a secure web app we use JWT to create sessions and store the user of the logged in user. To access authenticated we can use
-```go
+To ensure a secure web app we use JWT to create sessions and store the user of the logged in user. To access authenticated we can use <code>user, _ := c.Get("user")</code>
 
-```
+##
+||||
+|-|-|-|
+|![alt text](image.png)|![alt text](image-1.png)|![alt text](image-3.png)|
+|![alt text](image-4.png)|![alt text](image-5.png)|![alt text](image-6.png)|
