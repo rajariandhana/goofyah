@@ -5,6 +5,9 @@
 | Ralfazza Rajariandhana | 5025221081 | IUP |
 | Tabina Callistadya | 5025221318 | IUP |
 
+## App demo video
+https://youtu.be/Nc03xjABxcw
+
 ## About
 GOal Organizer For You At Hand or GOOFYAH is a web application where users can list their goals that they want to do. Users can also categorized their goals to organize it.
 
